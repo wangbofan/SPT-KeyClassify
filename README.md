@@ -5,6 +5,8 @@
 
 参考 MGmod（麻瓜编辑器）的钥匙分类思路重写，独立服务端 mod，SPT 4.1.x（net10.0）。
 
+> 下载：[GitHub Releases](https://github.com/wangbofan/SPT-KeyClassify/releases) · 源码：[wangbofan/SPT-KeyClassify](https://github.com/wangbofan/SPT-KeyClassify)
+
 ---
 
 ## 效果

@@ -1,0 +1,79 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <RootNamespace>KeyClassify</RootNamespace>
+        <AssemblyName>KeyClassify</AssemblyName>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <OutputType>Library</OutputType>
+        <Version>1.0.0</Version>
+        <OutputPath>bin\$(Configuration)\$(ProjectName)\$(AssemblyName)\</OutputPath>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <!-- A library does not serve static assets; this keeps staticwebassets.*.json out of the mod folder -->
+        <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
+    </PropertyGroup>
+
+    <!--
+        SPT 4.1.x ships its assemblies with the server instead of NuGet (NuGet only goes up to 4.1.2),
+        so we compile against a real installation. Point this somewhere else with
+            dotnet build -c Release -p:SptServerDir="D:\SPT"
+    -->
+    <PropertyGroup>
+        <SptServerDir Condition="'$(SptServerDir)' == ''">E:\GAME\SPT_Runtime</SptServerDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Reference Include="SPTarkov.Server.Core">
+            <HintPath>$(SptServerDir)\SPTarkov.Server.Core.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="SPTarkov.Common">
+            <HintPath>$(SptServerDir)\SPTarkov.Common.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="SPTarkov.DI">
+            <HintPath>$(SptServerDir)\SPTarkov.DI.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="SemanticVersioning">
+            <HintPath>$(SptServerDir)\SemanticVersioning.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+    </ItemGroup>
+
+    <!-- Keep the mod folder next to the server in sync for quick iteration -->
+    <!-- -p:SkipModCopy=true builds without touching the server folder (handy on machines where that path is read-only) -->
+    <Target Name="DebugCopy" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug' and '$(SkipModCopy)' != 'true'">
+        <PropertyGroup>
+            <DebugStaging>$(SptServerDir)\user\mods\$(ProjectName)</DebugStaging>
+        </PropertyGroup>
+        <MakeDir Directories="$(DebugStaging)" />
+        <ItemGroup>
+            <DebugDlls Include="$(OutputPath)*.dll" />
+            <DebugPdb Include="$(OutputPath)*.pdb" />
+            <ConfigFolder Include="$(OutputPath)config\**\*.*" />
+        </ItemGroup>
+        <Message Importance="high" Text="Copying debug build to $(DebugStaging)" />
+        <Copy SourceFiles="@(DebugDlls)" DestinationFolder="$(DebugStaging)" SkipUnchangedFiles="false" />
+        <Copy SourceFiles="@(DebugPdb)" DestinationFolder="$(DebugStaging)" SkipUnchangedFiles="false" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
+        <Copy SourceFiles="@(ConfigFolder)" DestinationFiles="@(ConfigFolder->'$(DebugStaging)\config\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    </Target>
+
+    <!-- Release output is staged into artifacts/ so it can be zipped for distribution -->
+    <Target Name="StagingForge" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+        <PropertyGroup>
+            <StagingDir Condition="'$(StagingDir)' == ''">$(MSBuildThisFileDirectory)artifacts\$(ProjectName)\SPT\user\mods\$(ProjectName)</StagingDir>
+        </PropertyGroup>
+        <MakeDir Directories="$(StagingDir)" Condition="!Exists('$(StagingDir)')" />
+        <ItemGroup>
+            <DllFiles Include="$(OutputPath)*.dll" />
+            <ConfigFolder Include="$(OutputPath)config\**\*.*" />
+        </ItemGroup>
+        <Message Importance="high" Text="Copying release build to $(StagingDir)" />
+        <Copy SourceFiles="@(DllFiles)" DestinationFolder="$(StagingDir)" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="@(ConfigFolder)" DestinationFiles="@(ConfigFolder->'$(StagingDir)\config\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="$(MSBuildThisFileDirectory)README.md" DestinationFolder="$(StagingDir)" SkipUnchangedFiles="true" Condition="Exists('$(MSBuildThisFileDirectory)README.md')" />
+    </Target>
+
+</Project>

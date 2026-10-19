@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "nameFormat": "【{map}】{name}",
+  "addDescriptionHeader": true,
+  "descriptionHeader": "<color=#00cccc><b>{map}</b></color>",
+  "includeKeycards": true,
+  "createUnknownCategory": true,
+  "removeEmptiedOriginalCategories": true,
+  "parentCategoryId": "5b47574386f77428ca22b342",
+  "mechanicalCategoryId": "5c518ec986f7743b68682ce2",
+  "electronicCategoryId": "5c518ed586f774119a772aee",
+  "categoryColor": ""
+}

@@ -7,7 +7,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <OutputType>Library</OutputType>
-        <Version>1.0.0</Version>
+        <Version>1.0.1</Version>
         <OutputPath>bin\$(Configuration)\$(ProjectName)\$(AssemblyName)\</OutputPath>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <!-- A library does not serve static assets; this keeps staticwebassets.*.json out of the mod folder -->
@@ -15,31 +15,28 @@
     </PropertyGroup>
 
     <!--
-        SPT 4.1.x ships its assemblies with the server instead of NuGet (NuGet only goes up to 4.1.2),
-        so we compile against a real installation. Point this somewhere else with
-            dotnet build -c Release -p:SptServerDir="D:\SPT"
+        Compile against the *lowest* SPT version we support, not the one installed on this machine.
+
+        The mod DLL records the assembly version it was compiled against (SPTarkov.Server.Core, Version=x.y.z.0).
+        .NET rolls that reference forward to newer assemblies but never back, so a DLL built against 4.1.6 refuses
+        to load on 4.1.5 ("Could not load file or assembly 'SPTarkov.Server.Core, Version=4.1.6.0'"). Building
+        against 4.1.0 makes the same DLL load on every 4.1.x server; SPT's mod loader then only checks that the
+        referenced version is not newer than the running server.
+
+        SPT publishes these assemblies on NuGet up to 4.1.2, so no local installation is needed to build.
+        Bump these three versions together if you deliberately drop older servers.
     -->
     <PropertyGroup>
+        <MinSptVersion>4.1.0</MinSptVersion>
+        <!-- Only used by the DebugCopy/StagingForge targets below, not by the compiler -->
         <SptServerDir Condition="'$(SptServerDir)' == ''">E:\GAME\SPT_Runtime</SptServerDir>
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="SPTarkov.Server.Core">
-            <HintPath>$(SptServerDir)\SPTarkov.Server.Core.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="SPTarkov.Common">
-            <HintPath>$(SptServerDir)\SPTarkov.Common.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="SPTarkov.DI">
-            <HintPath>$(SptServerDir)\SPTarkov.DI.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="SemanticVersioning">
-            <HintPath>$(SptServerDir)\SemanticVersioning.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
+        <PackageReference Include="SPTarkov.Server.Core" Version="$(MinSptVersion)" ExcludeAssets="runtime" PrivateAssets="all" />
+        <PackageReference Include="SPTarkov.Common" Version="$(MinSptVersion)" ExcludeAssets="runtime" PrivateAssets="all" />
+        <PackageReference Include="SPTarkov.DI" Version="$(MinSptVersion)" ExcludeAssets="runtime" PrivateAssets="all" />
+        <PackageReference Include="SemanticVersioning" Version="3.0.0" ExcludeAssets="runtime" PrivateAssets="all" />
     </ItemGroup>
 
     <!-- Keep the mod folder next to the server in sync for quick iteration -->

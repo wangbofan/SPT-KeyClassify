@@ -3,7 +3,10 @@
 把**钥匙**和**钥匙卡**按所属地图归类：藏身处/跳蚤市场（手册）里的 `钥匙` 下面会多出 12 个地图子分类，
 钥匙名字前面自动加上 `【地图名】`，描述顶部加一行地图标识，跳蚤市场的分类树也会同步跟着变。
 
-参考 MGmod（麻瓜编辑器）的钥匙分类思路重写，独立服务端 mod，SPT 4.1.x（net10.0）。
+参考 MGmod（麻瓜编辑器）的钥匙分类思路重写，独立服务端 mod（net10.0）。
+
+> **兼容性**：按 SPT **4.1.0** 的公开 API 编译，4.1.0 – 4.1.x 的服务端都能直接加载（.NET 会把程序集引用往前滚动到更新版本）。
+> 1.0.0 是用 4.1.6 编译的，所以在 4.1.5 上会报 `built for a different version of SPT`，请用 1.0.1 及以后。
 
 > 下载：[GitHub Releases](https://github.com/wangbofan/SPT-KeyClassify/releases) · 源码：[wangbofan/SPT-KeyClassify](https://github.com/wangbofan/SPT-KeyClassify)
 
@@ -133,16 +136,33 @@
 
 ## 从源码构建
 
-需要 .NET 10 SDK，并且指到你的 SPT 安装目录（默认 `E:\GAME\SPT_Runtime`）：
+需要 .NET 10 SDK。编译只依赖 NuGet 上的 SPT 程序集（`SPTarkov.Server.Core` / `SPTarkov.Common` / `SPTarkov.DI` 的 **4.1.0** 版），
+**不需要本机装 SPT**；只有"构建完顺手拷进游戏目录"这一步才用到 SPT 安装路径（默认 `E:\GAME\SPT_Runtime`）。
 
 ```
-dotnet build -c Debug
-dotnet build -c Debug -p:SptServerDir="D:\SPT"        # 指定别的安装位置
-dotnet build -c Debug -p:SkipModCopy=true             # 只编译，不往游戏目录拷
-dotnet build -c Release                               # 产物在 artifacts/ 下，可直接打包
+dotnet build -c Release                                   # 产物在 artifacts/ 下，可直接打包
+dotnet build -c Debug                                     # 编译并自动拷到 <SptServerDir>/user/mods/KeyClassify
+dotnet build -c Debug -p:SptServerDir="D:\SPT"           # 指定别的安装位置
+dotnet build -c Debug -p:SkipModCopy=true                 # 只编译，不碰游戏目录
+dotnet build -c Release -p:MinSptVersion=4.1.2            # 只支持 4.1.2 及以后（会写进 dll 的程序集引用）
 ```
 
-Debug 构建会自动把 dll 和 config 拷到 `<SptServerDir>/user/mods/KeyClassify`。
+**为什么锁 4.1.0**：dll 里记录的是编译时引用的程序集版本（`SPTarkov.Server.Core, Version=x.y.z.0`）。
+.NET 只会把引用"往前"滚动到更新的版本，不会往回滚，所以用 4.1.6 编出来的 dll 在 4.1.5 上会因找不到 4.1.6
+程序集而被 SPT 的加载器拒掉；反过来用 4.1.0 编的 dll 在 4.1.6 上正常加载（SPT 只拦"引用了比服务端更新的版本"的 mod）。
+
+## 更新日志
+
+### 1.0.1
+
+- 修复在 SPT 4.1.5 上加载失败：`Mod KeyClassify was built for a different version of SPT and was not loaded.
+  Reason: Could not load file or assembly 'SPTarkov.Server.Core, Version=4.1.6.0'`。
+- 改为按 NuGet 上 SPT 4.1.0 的程序集编译，4.1.0 – 4.1.x 全系列通用，不再需要按服务端版本挑构建。
+
+### 1.0.0
+
+- 首个版本：钥匙 / 钥匙卡按地图分成 12 个子分类，名字加 `【地图】` 前缀，描述顶部加地图标识，
+  跳蚤市场分类树同步；支持 17 种语言、可选关闭钥匙卡分类、自动删除搬空的原分类。
 
 ## 常见问题
 

@@ -23,7 +23,9 @@ public record ModMetadata : IModMetadata
 
     public List<string>? Contributors { get; init; }
 
-    public SemanticVersioning.Version Version { get; init; } = new("1.0.0");
+    // Single source of truth is <Version> in KeyClassify.csproj; the assembly version carries it.
+    public SemanticVersioning.Version Version { get; init; } =
+        new(typeof(ModMetadata).Assembly.GetName().Version?.ToString(3) ?? "0.0.0");
 
     public SemanticVersioning.Range SptVersion { get; init; } = new("~4.1.0");
 

@@ -31,7 +31,8 @@
    └─ 未知        (12 把，即不绑定具体地图的钥匙)
 ```
 
-物品名变成 `【海关】公司主管办公室钥匙`，描述第一行是 `海关`（带颜色）。
+物品名变成 `【海关】公司主管办公室钥匙`。描述默认保持原样——名字前缀已经带地图了，
+想在描述顶部再加一行带颜色的地图标识，把 `addDescriptionHeader` 设成 `true` 就行。
 语言跟随客户端：中文客户端显示中文，俄语客户端显示俄语……共支持游戏自带的 17 种语言，
 地图名直接取游戏自己的地图名翻译，不需要额外维护词条。
 
@@ -79,8 +80,8 @@
 | --- | --- | --- |
 | `enabled` | `true` | 总开关，关掉就完全不动手册 |
 | `nameFormat` | `【{map}】{name}` | 物品名格式，`{map}` 本地化地图名，`{name}` 原名（必须有） |
-| `addDescriptionHeader` | `true` | 是否在描述顶部插入地图标识 |
-| `descriptionHeader` | `<color=#00cccc><b>{map}</b></color>` | 描述顶部那行的格式 |
+| `addDescriptionHeader` | `false` | 是否在描述顶部插入地图标识。默认关：名字前缀已经带地图，而那一行是带颜色的富文本，容易被当成"物品被染色了" |
+| `descriptionHeader` | `<color=#00cccc><b>{map}</b></color>` | 描述顶部那行的格式，仅 `addDescriptionHeader` 为 `true` 时生效 |
 | `includeKeycards` | `true` | `false` 时钥匙卡保持原样，只有普通钥匙按地图分类 |
 | `createUnknownCategory` | `true` | `false` 时不生成"未知"分类，这批钥匙留在原分类 |
 | `removeEmptiedOriginalCategories` | `true` | 搬空后是否删掉原来的"机械钥匙 / 电子钥匙" |
@@ -153,6 +154,11 @@ dotnet build -c Release -p:MinSptVersion=4.1.2            # 只支持 4.1.2 及�
 
 ## 更新日志
 
+### 1.0.2
+
+- `addDescriptionHeader` 默认改为 `false`：只在物品名前加 `【地图】`，不再往描述顶部插那行带颜色的地图标识。
+  旧配置里如果还是 `true`，手动改成 `false` 并重启服务端即可（想保留就继续用 `true`，行为不变）。
+
 ### 1.0.1
 
 - 修复在 SPT 4.1.5 上加载失败：`Mod KeyClassify was built for a different version of SPT and was not loaded.
@@ -176,3 +182,5 @@ dotnet build -c Release -p:MinSptVersion=4.1.2            # 只支持 4.1.2 及�
   `Dropped SPT's cached handbook lookup`；如果提示 `SPT changed how it caches the handbook`，
   那是 SPT 改了内部字段名，`HandbookCacheRefresher.cs` 里的 `_handbookPriceCache` 需要跟着改。
 - **钥匙卡想单独放？** `includeKeycards: false`，钥匙卡会留在"电子钥匙"分类里。
+- **描述第一行是青色的地图名，像物品被染色了？** 那是 `descriptionHeader` 里的富文本标签，不动物品本身的颜色。
+  1.0.2 起默认关闭；旧配置把 `addDescriptionHeader` 改成 `false` 重启即可，名字前缀不受影响。

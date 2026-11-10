@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "nameFormat": "【{map}】{name}",
-  "addDescriptionHeader": true,
+  "addDescriptionHeader": false,
   "descriptionHeader": "<color=#00cccc><b>{map}</b></color>",
   "includeKeycards": true,
   "createUnknownCategory": true,

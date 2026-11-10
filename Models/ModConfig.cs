@@ -22,10 +22,11 @@ public sealed class ModConfig
     public string NameFormat { get; set; } = "【{map}】{name}";
 
     /// <summary>
-    ///     Adds the map name to the top of the item description as well.
+    ///     Adds the map name to the top of the item description as well. Off by default: the name prefix already
+    ///     carries the map, and the header is a rich text line, so it reads as "the item changed colour".
     /// </summary>
     [JsonPropertyName("addDescriptionHeader")]
-    public bool AddDescriptionHeader { get; set; } = true;
+    public bool AddDescriptionHeader { get; set; } = false;
 
     /// <summary>
     ///     Format of the description header. {map} is replaced with the localized map name.
